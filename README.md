@@ -55,6 +55,10 @@ Required fields per row:
 
 Empty lines are ignored.
 
+Rows where only the first column is filled are also ignored. This is useful for
+CSV files that contain manual separator or pseudo-header rows. Skipped rows are
+reported on stdout during import.
+
 Example:
 
 ```csv

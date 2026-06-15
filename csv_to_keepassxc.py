@@ -99,6 +99,20 @@ def normalize_row(row, row_number):
     return normalized
 
 
+def classify_skippable_row(row):
+    normalized = {key: (value or "").strip() for key, value in row.items()}
+    if not any(normalized.values()):
+        return "empty row"
+
+    non_username_values = [
+        value for key, value in normalized.items() if key != "username" and value
+    ]
+    if normalized.get("username") and not non_username_values:
+        return "header-like row with only first column filled"
+
+    return None
+
+
 def sanitize_title_part(value):
     return value.replace("/", "-")
 
@@ -271,7 +285,9 @@ def main():
         reader = csv.DictReader(handle)
         validate_columns(reader.fieldnames)
         for row_number, row in enumerate(reader, start=2):
-            if not any((value or "").strip() for value in row.values()):
+            skip_reason = classify_skippable_row(row)
+            if skip_reason:
+                print(f"Skipping row {row_number}: {skip_reason}")
                 continue
 
             normalized_row = normalize_row(row, row_number)

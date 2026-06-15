@@ -148,6 +148,24 @@ class CsvToKeePassXCIntegrationTests(unittest.TestCase):
         lines = self.keepass_show("Imported/Alice Example (alice)", "UserName")
         self.assertEqual(lines, ["alice"])
 
+    def test_import_skips_and_logs_empty_and_header_like_rows(self):
+        self.write_csv([
+            ["", "", "", "", "", "", ""],
+            ["Teachers", "", "", "", "", "", ""],
+            ["jsmith", "secret1", "student", "Smith", "John", "Central High", "10A"],
+        ])
+
+        result = self.run_import()
+
+        self.assertIn("Skipping row 2: empty row", result.stdout)
+        self.assertIn(
+            "Skipping row 3: header-like row with only first column filled",
+            result.stdout,
+        )
+        self.assertIn("(1 created, 0 updated)", result.stdout)
+        lines = self.keepass_show("Imported/John Smith (jsmith)", "UserName")
+        self.assertEqual(lines, ["jsmith"])
+
     def test_import_creates_backup_before_updating_existing_database(self):
         self.write_csv([
             ["jsmith", "secret1", "student", "Smith", "John", "Central High", "10A"],
