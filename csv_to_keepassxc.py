@@ -5,6 +5,7 @@ import csv
 from datetime import datetime, timezone
 import getpass
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -44,6 +45,12 @@ def create_database(db_path, master_password):
         ["db-create", "-p", str(db_path)],
         f"{master_password}\n{master_password}\n",
     )
+
+
+def backup_database(db_path):
+    backup_path = db_path.with_suffix(db_path.suffix + ".bak")
+    shutil.copy2(db_path, backup_path)
+    return backup_path
 
 
 def group_exists(db_path, master_password, group):
@@ -252,6 +259,8 @@ def main():
 
     if not args.database_file.exists():
         create_database(args.database_file, master_password)
+    else:
+        backup_database(args.database_file)
 
     ensure_group(args.database_file, master_password, args.group)
     entry_index = build_entry_index(args.database_file, master_password, args.group)

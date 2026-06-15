@@ -10,6 +10,7 @@ import again.
 
 - Reads a CSV file with the expected UCS column layout
 - Creates a new KeePassXC database if the target `.kdbx` file does not exist
+- Creates a `.bak` copy before modifying an existing database
 - Creates the target group if needed
 - Adds new entries
 - Updates existing entries when the same username already exists in the group
@@ -108,6 +109,8 @@ make run CSV=users.csv DB=users.kdbx GROUP=Imported PASSWORD_ENV=MY_DB_PASSWORD
 ## Import behavior
 
 - If `users.kdbx` does not exist, it is created automatically.
+- If `users.kdbx` already exists, a backup is written to `users.kdbx.bak`
+  before any changes are made.
 - If the target group does not exist, it is created automatically.
 - If a username does not exist in the group, a new entry is created.
 - If a username already exists in the group, that entry is updated.

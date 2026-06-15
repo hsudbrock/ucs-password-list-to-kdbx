@@ -148,6 +148,22 @@ class CsvToKeePassXCIntegrationTests(unittest.TestCase):
         lines = self.keepass_show("Imported/Alice Example (alice)", "UserName")
         self.assertEqual(lines, ["alice"])
 
+    def test_import_creates_backup_before_updating_existing_database(self):
+        self.write_csv([
+            ["jsmith", "secret1", "student", "Smith", "John", "Central High", "10A"],
+        ])
+        self.run_import()
+        original_bytes = self.db_path.read_bytes()
+
+        self.write_csv([
+            ["jsmith", "secret2", "teacher", "Doe", "Jane", "North Campus", "12B"],
+        ])
+        self.run_import()
+
+        backup_path = self.db_path.with_suffix(".kdbx.bak")
+        self.assertTrue(backup_path.exists())
+        self.assertEqual(backup_path.read_bytes(), original_bytes)
+
 
 if __name__ == "__main__":
     unittest.main()
